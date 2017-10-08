@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session, redirect, url_for
+from flask import Flask, render_template, request, session
 import os
 
 my_app = Flask(__name__)
@@ -9,7 +9,6 @@ login = {"hello":"life"}
 @my_app.route("/", methods = ['GET','POST'])
 def root():
     print session
-    print request.args.keys
     if "login" in session:
         return render_template("welcome.html", username = session["username"])
     else:
@@ -22,11 +21,20 @@ def response():
             if(request.form["password"] == login[username]):
                 session["login"] = True
                 session["username"] = request.form["username"]
+                session["password"] = request.form["password"]
                 return render_template('welcome.html', username = session["username"]) 
             else:
                 return render_template('form.html', loggingOut = False, error = True, errorStatement = "Invalid password.")
         else:
             return render_template('form.html', loggingOut = False, error = True, errorStatement = "Invalid username.")
+        
+@my_app.route("/logout", methods = ['GET', 'POST'])
+def logout():
+    session.pop("login")
+    session.pop("username")
+    session.pop("password")
+    #removes all the session details
+    return render_template('form.html', loggingOut = True, error = False, errorStatement = "")
 
 if __name__ == '__main__':
     my_app.debug = True
