@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, request, session, redirect, url_for
 import os
 
 my_app = Flask(__name__)
@@ -10,7 +10,7 @@ login = {"hello":"life"}
 def root():
     print session
     if "login" in session:
-        return render_template("welcome.html", username = session["username"])
+        return redirect(url_for('response'))
     else:
         return render_template('form.html', loggingOut = False, error = False, errorStatement = "")
 
@@ -27,14 +27,17 @@ def response():
                 return render_template('form.html', loggingOut = False, error = True, errorStatement = "Invalid password.")
         else:
             return render_template('form.html', loggingOut = False, error = True, errorStatement = "Invalid username.")
+
         
 @my_app.route("/logout", methods = ['GET', 'POST'])
 def logout():
-    session.pop("login")
-    session.pop("username")
-    session.pop("password")
+    #session.pop("login")
+    #session.pop("username")
+    #session.pop("password")
+    session.clear()
     #removes all the session details
-    return render_template('form.html', loggingOut = True, error = False, errorStatement = "")
+    return redirect(url_for('root'))
+    #return render_template('form.html', loggingOut = True, error = False, errorStatement = "")
 
 if __name__ == '__main__':
     my_app.debug = True
