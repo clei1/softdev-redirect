@@ -1,43 +1,61 @@
-from flask import Flask, render_template, request, session, redirect, url_for
+from flask import Flask, render_template, request, session, redirect, url_for, flash
 import os
 
 my_app = Flask(__name__)
 my_app.secret_key = os.urandom(32)
 
-login = {"hello":"life"}
+login = {"hello":"life", "life":"hello"}
 
 @my_app.route("/", methods = ['GET','POST'])
 def root():
-    print session
+    '''
+    two possible routes:
+    welcome page if logged in
+    login page if not logged in
+    '''
     if "login" in session:
-        return redirect(url_for('response'))
-    else:
-        return render_template('form.html', loggingOut = False, error = False, errorStatement = "")
+        return redirect(url_for('welcome')) 
+    return render_template('form.html')
 
-@my_app.route("/response", methods = ['GET','POST'])
+@my_app.route("/logout", methods = ['GET', 'POST'])
+def logout():
+    '''
+    one possible routes:
+    welcome page
+    '''
+    session.clear()
+    return redirect(url_for('root'))
+
+@my_app.route('/welcome', methods = ['GET','POST'])
+def welcome():
+    '''
+    two possible routes:
+    welcome page if logged in
+    login page if not logged in
+    '''    
+    if "login" in session:
+        return render_template('welcome.html', username = session['username'])
+    else:
+        return redirect(url_for('root'))
+
+@my_app.route('/response', methods = ['POST'])
 def response():
+    '''
+    three possible routes:
+    welcome page if authorized to log in
+    login page if error exists
+    '''
     for username in login:
         if (request.form["username"] == username):
             if(request.form["password"] == login[username]):
                 session["login"] = True
                 session["username"] = request.form["username"]
-                session["password"] = request.form["password"]
-                return render_template('welcome.html', username = session["username"]) 
+                return redirect(url_for('welcome'))
             else:
-                return render_template('form.html', loggingOut = False, error = True, errorStatement = "Invalid password.")
-        else:
-            return render_template('form.html', loggingOut = False, error = True, errorStatement = "Invalid username.")
-
-        
-@my_app.route("/logout", methods = ['GET', 'POST'])
-def logout():
-    #session.pop("login")
-    #session.pop("username")
-    #session.pop("password")
-    session.clear()
-    #removes all the session details
-    return redirect(url_for('root'))
-    #return render_template('form.html', loggingOut = True, error = False, errorStatement = "")
+                flash('Invalid password.')
+                return redirect(url_for('root'))
+    flash('Invalid username.')     
+    return redirect(url_for('root'))                       
 
 if __name__ == '__main__':
     my_app.debug = True

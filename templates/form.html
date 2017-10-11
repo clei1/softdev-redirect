@@ -5,6 +5,13 @@
   </head>
   <body>
 
+    {% set messages = get_flashed_messages() %}
+    {% for message in messages %}
+    <p> {{ message  }} </p>
+    <br>
+    {% endfor %}
+    
+    <!--
     {% if loggingOut %}
     <p> Logged out successfully! </p>
     <br>
@@ -14,6 +21,7 @@
     <p> {{errorStatement}} </p>
     <br>
     {% endif %}
+    -->
     
     <form method="POST" action="/response">
       Username:
@@ -22,7 +30,7 @@
       <br>
       Password:
       <br>
-      <input type="password" name="password">
+      <input type="text" name="password">
       <br>
       <input type="submit" value="Submit">
     </form>    
